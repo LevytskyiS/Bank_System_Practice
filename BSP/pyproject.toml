@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "bsp"
+version = "0.1.0"
+description = ""
+authors = ["LevytskyiS <levytskyi.sv@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = {extras = ["dotenv"], version = "^1.10.9"}
+sqlalchemy = "^2.0.16"
+fastapi = "^0.97.0"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+alembic = "^1.11.1"
+psycopg2 = "^2.9.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
