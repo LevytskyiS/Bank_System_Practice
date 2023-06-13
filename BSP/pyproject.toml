@@ -13,6 +13,7 @@ fastapi = "^0.97.0"
 uvicorn = {extras = ["standard"], version = "^0.22.0"}
 alembic = "^1.11.1"
 psycopg2 = "^2.9.6"
+faker = "^18.10.1"
 
 
 [build-system]
