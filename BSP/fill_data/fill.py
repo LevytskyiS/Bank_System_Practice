@@ -9,6 +9,8 @@ from faker import Faker
 from src.database.models import Bank, Client, ClientM2MBank, Account, CreditCard
 from src.database.connect import session
 
+SEX = ["male", "female"]
+
 
 def prep_fake_data():
     fake_names = []
@@ -41,7 +43,7 @@ def prep_fake_data():
 
     # for _ in range(10000):
     #     fake_phones.append(fake_data.msisdn())
-    
+
     while len(fake_phones) != 10000:
         fake_phone = fake_data.msisdn()
         if fake_phone in fake_phones:
@@ -149,6 +151,7 @@ def fill_db(clients: list, banks: list, m2m: list, accounts: list, cards: list):
                 phone=client[3],
                 secret_word=client[4],
                 passport_number=client[5],
+                sex=random.choice(SEX),
             )
         )
 
