@@ -56,10 +56,11 @@ class Client(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String(20), nullable=False)
     last_name = Column(String(30), nullable=False)
-    email = Column(String(50), nullable=False, unique=False)
-    phone = Column(String, unique=False)
+    email = Column(String(50), nullable=False, unique=True)
+    phone = Column(String, unique=True)
     secret_word = Column(String, nullable=False)
-    passport_number = Column(String, nullable=False, unique=False)
+    passport_number = Column(String, nullable=False, unique=True)
+    sex = Column(String(5), nullable=False)
 
 
 class Account(Base):

@@ -29,17 +29,38 @@ def prep_fake_data():
     for _ in range(10000):
         fake_last_names.append(fake_data.name().split(" ")[1])
 
-    for _ in range(10000):
-        fake_emails.append(fake_data.email())
+    # for _ in range(10000):
+    #     fake_emails.append(fake_data.email())
 
-    for _ in range(10000):
-        fake_phones.append(fake_data.msisdn())
+    while len(fake_emails) != 10000:
+        fake_email = fake_data.email()
+        if fake_email in fake_emails:
+            continue
+        else:
+            fake_emails.append(fake_email)
+
+    # for _ in range(10000):
+    #     fake_phones.append(fake_data.msisdn())
+    
+    while len(fake_phones) != 10000:
+        fake_phone = fake_data.msisdn()
+        if fake_phone in fake_phones:
+            continue
+        else:
+            fake_phones.append(fake_phone)
 
     for _ in range(10000):
         secret_words.append(fake_data.word())
 
-    for _ in range(10000):
-        fake_passports.append(fake_data.passport_number())
+    # for _ in range(10000):
+    #     fake_passports.append(fake_data.passport_number())
+
+    while len(fake_passports) != 10000:
+        fake_passport = fake_data.passport_number()
+        if fake_passport in fake_passports:
+            continue
+        else:
+            fake_passports.append(fake_passport)
 
     for _ in range(200):
         fake_bank_titles.append(f"{fake_data.company()} Bank")
