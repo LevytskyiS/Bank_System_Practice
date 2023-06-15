@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, func, Table
+from sqlalchemy import Column, Integer, String, Boolean, func, Table, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
@@ -65,7 +65,7 @@ class Client(Base):
 class Account(Base):
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True)
-    account_number = Column(Integer, nullable=False)
+    account_number = Column(String(50), nullable=False)
     current_deposit = Column(Integer, default=0)
     client_id = Column("client_id", ForeignKey("clients.id", ondelete="CASCADE"))
     client = relationship("Client", backref="clients", innerjoin=True)
@@ -74,7 +74,7 @@ class Account(Base):
 class CreditCard(Base):
     __tablename__ = "creditcards"
     id = Column(Integer, primary_key=True)
-    card_number = Column(Integer, nullable=False)
+    card_number = Column(BigInteger, nullable=False)
     pin_code = Column(Integer, default=0)
     account_id = Column("account_id", ForeignKey("accounts.id", ondelete="CASCADE"))
     account = relationship("Account", backref="accounts", innerjoin=True)

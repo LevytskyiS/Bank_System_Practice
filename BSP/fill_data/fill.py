@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath("."))
 
 from faker import Faker
 
-from src.database.models import Bank, Client, ClientM2MBank
+from src.database.models import Bank, Client, ClientM2MBank, Account, CreditCard
 from src.database.connect import session
 
 
@@ -19,6 +19,8 @@ def prep_fake_data():
     fake_passports = []
     fake_bank_titles = []
     fake_bank_codes = []
+    fake_accounts = []
+    fake_credit_cards = []
     fake_data = Faker()
 
     for _ in range(10000):
@@ -45,6 +47,12 @@ def prep_fake_data():
     for _ in range(200):
         fake_bank_codes.append(fake_data.aba())
 
+    for _ in range(10000):
+        fake_accounts.append(fake_data.iban())
+
+    for _ in range(10000):
+        fake_credit_cards.append(fake_data.credit_card_number())
+
     return (
         fake_names,
         fake_last_names,
@@ -54,6 +62,8 @@ def prep_fake_data():
         fake_passports,
         fake_bank_titles,
         fake_bank_codes,
+        fake_accounts,
+        fake_credit_cards,
     )
 
 
@@ -66,6 +76,8 @@ def prep_db_objects(
     passports: list,
     bank_titles: list,
     bank_codes: list,
+    accounts: list,
+    credit_cards: list,
 ):
     for_clients = []
     for n, ln, e, p, w, pa in zip(names, last_names, emails, phones, words, passports):
@@ -81,13 +93,31 @@ def prep_db_objects(
             (random.randrange(1, 10000), random.randrange(1, 200))
         )
 
-    return for_clients, for_banks, for_clients_m2m_banks
+    for_accounts = []
+    for a in accounts:
+        for_accounts.append(
+            (a, random.randrange(0, 9999999), random.randrange(1, 10000))
+        )
+
+    for_credit_cards = []
+    for card in credit_cards:
+        for_credit_cards.append(
+            (card, random.randrange(1000, 9999), random.randrange(1, 10000))
+        )
+
+    return for_clients, for_banks, for_clients_m2m_banks, for_accounts, for_credit_cards
 
 
-for_clients, for_banks, for_clients_m2m_banks = prep_db_objects(*prep_fake_data())
+(
+    for_clients,
+    for_banks,
+    for_clients_m2m_banks,
+    for_accounts,
+    for_credit_cards,
+) = prep_db_objects(*prep_fake_data())
 
 
-def fill_db(clients: list, banks: list, m2m: list):
+def fill_db(clients: list, banks: list, m2m: list, accounts: list, cards: list):
     client_objs = []
     for client in clients:
         client_objs.append(
@@ -118,5 +148,23 @@ def fill_db(clients: list, banks: list, m2m: list):
     session.add_all(m2m_objs)
     session.commit()
 
+    accounts_objs = []
+    for acc in accounts:
+        accounts_objs.append(
+            Account(account_number=acc[0], current_deposit=acc[1], client_id=acc[2])
+        )
 
-fill_db(for_clients, for_banks, for_clients_m2m_banks)
+    session.add_all(accounts_objs)
+    session.commit()
+
+    card_objs = []
+    for card in cards:
+        card_objs.append(
+            CreditCard(card_number=card[0], pin_code=card[1], account_id=card[2])
+        )
+
+    session.add_all(card_objs)
+    session.commit()
+
+
+fill_db(for_clients, for_banks, for_clients_m2m_banks, for_accounts, for_credit_cards)
