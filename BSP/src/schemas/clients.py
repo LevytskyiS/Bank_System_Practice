@@ -8,7 +8,6 @@ class ClientModel(BaseModel):
     phone: int = Field()
     secret_word: str = Field()
     passport_number: str = Field()
-    sex: str = Field(default="")
 
     # first_name = Column(String(20), nullable=False)
     # last_name = Column(String(30), nullable=False)

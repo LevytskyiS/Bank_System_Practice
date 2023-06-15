@@ -26,8 +26,7 @@ async def create_client(
     db: Session = Depends(get_db),
     sex=Query(enum=["male", "female"]),
 ):
-    body.sex = sex
-    user = await repository_clients.create_client(body, db)
+    user = await repository_clients.create_client(body, sex, db)
     # check_mail = await repository_users.check_exist_mail(body, db)
     # if check_mail:
     #     raise HTTPException(

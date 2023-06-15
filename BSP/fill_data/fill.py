@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath("."))
 
 from faker import Faker
 
-from src.database.models import Bank, Client, ClientM2MBank, Account, CreditCard
+from src.database.models import Client, Account, CreditCard
 from src.database.connect import session
 
 SEX = ["male", "female"]
@@ -19,8 +19,8 @@ def prep_fake_data():
     fake_phones = []
     secret_words = []
     fake_passports = []
-    fake_bank_titles = []
-    fake_bank_codes = []
+    # fake_bank_titles = []
+    # fake_bank_codes = []
     fake_accounts = []
     fake_credit_cards = []
     fake_data = Faker()
@@ -64,11 +64,11 @@ def prep_fake_data():
         else:
             fake_passports.append(fake_passport)
 
-    for _ in range(200):
-        fake_bank_titles.append(f"{fake_data.company()} Bank")
+    # for _ in range(200):
+    #     fake_bank_titles.append(f"{fake_data.company()} Bank")
 
-    for _ in range(200):
-        fake_bank_codes.append(fake_data.aba())
+    # for _ in range(200):
+    #     fake_bank_codes.append(fake_data.aba())
 
     for _ in range(10000):
         fake_accounts.append(fake_data.iban())
@@ -83,8 +83,8 @@ def prep_fake_data():
         fake_phones,
         secret_words,
         fake_passports,
-        fake_bank_titles,
-        fake_bank_codes,
+        # fake_bank_titles,
+        # fake_bank_codes,
         fake_accounts,
         fake_credit_cards,
     )
@@ -97,8 +97,8 @@ def prep_db_objects(
     phones: list,
     words: list,
     passports: list,
-    bank_titles: list,
-    bank_codes: list,
+    # bank_titles: list,
+    # bank_codes: list,
     accounts: list,
     credit_cards: list,
 ):
@@ -106,9 +106,9 @@ def prep_db_objects(
     for n, ln, e, p, w, pa in zip(names, last_names, emails, phones, words, passports):
         for_clients.append((n, ln, e, p, w, pa))
 
-    for_banks = []
-    for bt, bc in zip(bank_titles, bank_codes):
-        for_banks.append((bt, bc))
+    # for_banks = []
+    # for bt, bc in zip(bank_titles, bank_codes):
+    #     for_banks.append((bt, bc))
 
     for_clients_m2m_banks = []
     for _ in range(10000):
@@ -128,19 +128,31 @@ def prep_db_objects(
             (card, random.randrange(1000, 9999), random.randrange(1, 10000))
         )
 
-    return for_clients, for_banks, for_clients_m2m_banks, for_accounts, for_credit_cards
+    return (
+        for_clients,
+        # for_banks,
+        # for_clients_m2m_banks,
+        for_accounts,
+        for_credit_cards,
+    )
 
 
 (
     for_clients,
-    for_banks,
-    for_clients_m2m_banks,
+    # for_banks,
+    # for_clients_m2m_banks,
     for_accounts,
     for_credit_cards,
 ) = prep_db_objects(*prep_fake_data())
 
 
-def fill_db(clients: list, banks: list, m2m: list, accounts: list, cards: list):
+def fill_db(
+    clients: list,
+    # banks: list,
+    # m2m: list,
+    accounts: list,
+    cards: list,
+):
     client_objs = []
     for client in clients:
         client_objs.append(
@@ -158,19 +170,19 @@ def fill_db(clients: list, banks: list, m2m: list, accounts: list, cards: list):
     session.add_all(client_objs)
     session.commit()
 
-    bank_objs = []
-    for bank in banks:
-        bank_objs.append(Bank(title=bank[0], bank_code=bank[1]))
+    # bank_objs = []
+    # for bank in banks:
+    #     bank_objs.append(Bank(title=bank[0], bank_code=bank[1]))
 
-    session.add_all(bank_objs)
-    session.commit()
+    # session.add_all(bank_objs)
+    # session.commit()
 
-    m2m_objs = []
-    for m2m_obj in m2m:
-        m2m_objs.append(ClientM2MBank(client_id=m2m_obj[0], bank_id=m2m_obj[1]))
+    # m2m_objs = []
+    # for m2m_obj in m2m:
+    #     m2m_objs.append(ClientM2MBank(client_id=m2m_obj[0], bank_id=m2m_obj[1]))
 
-    session.add_all(m2m_objs)
-    session.commit()
+    # session.add_all(m2m_objs)
+    # session.commit()
 
     accounts_objs = []
     for acc in accounts:
@@ -191,4 +203,10 @@ def fill_db(clients: list, banks: list, m2m: list, accounts: list, cards: list):
     session.commit()
 
 
-fill_db(for_clients, for_banks, for_clients_m2m_banks, for_accounts, for_credit_cards)
+fill_db(
+    for_clients,
+    # for_banks,
+    # for_clients_m2m_banks,
+    for_accounts,
+    for_credit_cards,
+)
