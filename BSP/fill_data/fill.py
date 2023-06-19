@@ -15,6 +15,7 @@ SEX = ["male", "female"]
 def prep_fake_data():
     fake_names = []
     fake_last_names = []
+    fake_tax_numbers = []
     fake_emails = []
     fake_phones = []
     secret_words = []
@@ -30,6 +31,13 @@ def prep_fake_data():
 
     for _ in range(10000):
         fake_last_names.append(fake_data.name().split(" ")[1])
+
+    while len(fake_tax_numbers) != 100000:
+        fake_tn = random.randrange(1000000, 9999999)
+        if fake_tn in fake_tax_numbers:
+            continue
+        else:
+            fake_tax_numbers.append(fake_tn)
 
     # for _ in range(10000):
     #     fake_emails.append(fake_data.email())
@@ -79,6 +87,7 @@ def prep_fake_data():
     return (
         fake_names,
         fake_last_names,
+        fake_tax_numbers,
         fake_emails,
         fake_phones,
         secret_words,
@@ -93,6 +102,7 @@ def prep_fake_data():
 def prep_db_objects(
     names: list,
     last_names: list,
+    tax_numbers: list,
     emails: list,
     phones: list,
     words: list,
@@ -103,8 +113,10 @@ def prep_db_objects(
     credit_cards: list,
 ):
     for_clients = []
-    for n, ln, e, p, w, pa in zip(names, last_names, emails, phones, words, passports):
-        for_clients.append((n, ln, e, p, w, pa))
+    for n, ln, tn, e, p, w, pa in zip(
+        names, last_names, tax_numbers, emails, phones, words, passports
+    ):
+        for_clients.append((n, ln, tn, e, p, w, pa))
 
     # for_banks = []
     # for bt, bc in zip(bank_titles, bank_codes):
@@ -159,14 +171,14 @@ def fill_db(
             Client(
                 first_name=client[0],
                 last_name=client[1],
-                email=client[2],
-                phone=client[3],
-                secret_word=client[4],
-                passport_number=client[5],
+                tax_number=client[2],
+                email=client[3],
+                phone=client[4],
+                secret_word=client[5],
+                passport_number=client[6],
                 sex=random.choice(SEX),
             )
         )
-
     session.add_all(client_objs)
     session.commit()
 

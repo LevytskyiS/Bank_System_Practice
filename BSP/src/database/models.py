@@ -29,6 +29,7 @@ class Client(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String(20), nullable=False)
     last_name = Column(String(30), nullable=False)
+    tax_number = Column(BigInteger, nullable=False, unique=True)
     email = Column(String(50), nullable=False, unique=True)
     phone = Column(String, unique=True)
     secret_word = Column(String, nullable=False)
@@ -36,7 +37,7 @@ class Client(Base):
     sex = Column(String(6), nullable=False)
     vip = Column(Boolean, default=False)
     active = Column(Boolean, default=True)
-    truseted = Column(Boolean, default=True)
+    trusted = Column(Boolean, default=True)
 
 
 class Account(Base):

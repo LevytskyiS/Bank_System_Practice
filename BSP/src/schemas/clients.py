@@ -2,17 +2,39 @@ from pydantic import BaseModel, Field, EmailStr
 
 
 class ClientModel(BaseModel):
-    first_name: str = Field()
-    last_name: str = Field()
-    email: EmailStr = Field()
-    phone: int = Field()
-    secret_word: str = Field()
+    first_name: str = Field(min_length=1, max_length=20)
+    last_name: str = Field(min_length=1, max_length=30)
+    tax_number: int = Field(gt=1000000, le=9999999)
+    email: EmailStr
+    phone: int = Field(gt=100000000, le=999999999)
+    secret_word: str = Field(min_length=5)
     passport_number: str = Field()
 
-    # first_name = Column(String(20), nullable=False)
-    # last_name = Column(String(30), nullable=False)
-    # email = Column(String(50), nullable=False, unique=True)
-    # phone = Column(String, unique=True)
-    # secret_word = Column(String, nullable=False)
-    # passport_number = Column(String, nullable=False, unique=True)
-    # sex = Column(String(6), nullable=False)
+
+class ClientDBModel(BaseModel):
+    class Config:
+        orm_mode = True
+
+
+class ResponseClientModel(ClientDBModel):
+    id: int
+    first_name: str
+    last_name: str
+    tax_number: int
+    email: EmailStr
+    phone: int
+    passport_number: str
+
+
+class UpdateVIPClientModel(BaseModel):
+    tax_number: int
+
+
+class VIPStatusResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    vip: bool
+
+    class Config:
+        orm_mode = True

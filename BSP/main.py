@@ -3,7 +3,7 @@ from fastapi_limiter import FastAPILimiter
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from src.routes import clients
+from src.routes import clients, accounts
 from src.database.connect import get_db
 
 app = FastAPI()
@@ -45,3 +45,4 @@ def info():
 
 
 app.include_router(clients.router, prefix="/api")
+app.include_router(accounts.router, prefix="/api")
