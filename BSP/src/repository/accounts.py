@@ -10,7 +10,7 @@ from fastapi import Depends
 
 from sqlalchemy.orm import Session
 from src.database.models import Account, Client
-from src.schemas.accounts import AccountModel
+from src.schemas.accounts import AccountModel, ToDepositCash
 from src.database.connect import get_db
 
 # For testing
@@ -35,3 +35,20 @@ async def create_account_repo(client: Client, db: Session):
     db.commit()
     db.refresh(new_account)
     return new_account
+
+
+async def check_account_exists(account_number: str, db: Session):
+    account = db.query(Account).filter_by(account_number=account_number).first()
+    return account
+
+
+async def deposit_cash_repo(body: ToDepositCash, account: Account, db: Session):
+    account.current_deposit += int(body.amount)
+    db.commit()
+    return account
+
+
+async def withdraw_cash_repo(body: ToDepositCash, account: Account, db: Session):
+    account.current_deposit -= int(body.amount)
+    db.commit()
+    return account
