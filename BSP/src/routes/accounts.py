@@ -11,6 +11,8 @@ from src.schemas.accounts import (
     AccountModel,
     ToDepositCash,
     CurrentDepositResponseModel,
+    DeactivateAccountdModel,
+    TopAccountsModel,
 )
 from src.database.connect import get_db
 from src.repository import accounts as repository_accounts
@@ -64,14 +66,14 @@ async def deposit_cash(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Account not found."
         )
-    account = await repository_accounts.deposit_cash_repo(body, check_account, db)
+    account = await repository_accounts.deposit_cash_repo(body, db)
     return account
 
 
 @router.patch(
     "/withdraw_cash/",
     response_model=CurrentDepositResponseModel,
-    name="Deposit cash"
+    name="Withdraw cash"
     # dependencies=[
     # Depends(allowed_create_users),
     # Depends(RateLimiter(times=2, seconds=5)),
@@ -90,3 +92,39 @@ async def withdraw_cash(
         )
     account = await repository_accounts.withdraw_cash_repo(body, check_account, db)
     return account
+
+
+@router.patch(
+    "/deactivate_account/",
+    response_model=AccountResponseModel,
+    name="Deactivate account"
+    # dependencies=[
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def deactivate_account(
+    body: DeactivateAccountdModel, db: Session = Depends(get_db)
+):
+    account = await repository_accounts.check_account_exists(body.account_number, db)
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found."
+        )
+    deactivated_account = await repository_accounts.deactivate_account_repo(account, db)
+    return deactivated_account
+
+
+@router.get(
+    "/top_five_accounts/",
+    response_model=List[TopAccountsModel],
+    name="Top 5 accounts"
+    # dependencies=[
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def get_top_five_accounts(db: Session = Depends(get_db)):
+    accounts = await repository_accounts.get_top_five_accounts_repo(db)
+    result = await repository_accounts.convert_top_five_to_dict(accounts)
+    return result

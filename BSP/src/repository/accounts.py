@@ -9,7 +9,9 @@ sys.path.append(os.path.abspath("."))
 from fastapi import Depends
 
 from sqlalchemy.orm import Session
-from src.database.models import Account, Client
+from sqlalchemy import func, desc
+
+from src.database.models import Account, Client, CreditCard
 from src.schemas.accounts import AccountModel, ToDepositCash
 from src.database.connect import get_db
 
@@ -42,7 +44,8 @@ async def check_account_exists(account_number: str, db: Session):
     return account
 
 
-async def deposit_cash_repo(body: ToDepositCash, account: Account, db: Session):
+async def deposit_cash_repo(body: ToDepositCash, db: Session):
+    account = db.query(Account).filter_by(account_number=body.account_number).first()
     account.current_deposit += int(body.amount)
     db.commit()
     return account
@@ -52,3 +55,37 @@ async def withdraw_cash_repo(body: ToDepositCash, account: Account, db: Session)
     account.current_deposit -= int(body.amount)
     db.commit()
     return account
+
+
+async def deactivate_account_repo(account: Account, db: Session):
+    account.active = False
+    db.commit()
+    return account
+
+
+async def get_top_five_accounts_repo(db: Session):
+    accounts = (
+        db.query(
+            Client.id,
+            Account.current_deposit,
+            Account.account_number,
+        )
+        .select_from(Client)
+        .join(Account)
+        .order_by(desc(Account.current_deposit))
+        .limit(5)
+        .all()
+    )
+    return accounts
+
+
+async def convert_top_five_to_dict(accounts: list) -> list:
+    result = []
+    for a in accounts:
+        account = {
+            "client_id": a[0],
+            "current_deposit": a[1],
+            "account_number": a[2],
+        }
+        result.append(account)
+    return result

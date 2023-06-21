@@ -10,6 +10,7 @@ class AccountModel(BaseModel):
 class AccountResponseModel(BaseModel):
     id: int
     account_number: str
+    active: bool
 
     class Config:
         orm_mode = True
@@ -31,3 +32,16 @@ class CurrentDepositResponseModel(BaseModel):
 class ToWithdrawCash(BaseModel):
     account_number: str
     amount: float = Field(gt=0)
+
+
+class DeactivateAccountdModel(BaseModel):
+    account_number: str
+
+
+class TopAccountsModel(BaseModel):
+    client_id: int
+    current_deposit: int
+    account_number: str
+
+    class Config:
+        orm_mode = True

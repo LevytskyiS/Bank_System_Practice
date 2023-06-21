@@ -45,6 +45,7 @@ class Account(Base):
     id = Column(Integer, primary_key=True)
     account_number = Column(String(50), nullable=False)
     current_deposit = Column(Integer, default=0)
+    active = Column(Boolean, default=True)
     client_id = Column("client_id", ForeignKey("clients.id", ondelete="CASCADE"))
     client = relationship("Client", backref="clients", innerjoin=True)
 
