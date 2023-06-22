@@ -12,3 +12,8 @@ class CreditCardResponseModel(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class DeactivateCard(BaseModel):
+    client_tax_number: int = Field(gt=0)
+    card_number: int = Field(gt=0)

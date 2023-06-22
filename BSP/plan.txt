@@ -1,0 +1,35 @@
+Client
+
+1. Delete client
+2. Add "city" column to Client model
+
+Account
+
+1. Delete account
+
+Credit Card
+
+1. Delete credit card
+2. List of all active cards
+3. List of all deactivated cards
+
+Users
+
+1. User model
+2. Create user
+3. Patch user
+4. Delete user
+
+
+Dependencies
+
+1. Create Roles (Manager, Team Leader, Head of Department, Admin)
+2. Add roles to every route 
+
+Login using BearerToken
+
+Email confirmation
+
+1. Create beautiful e-mail
+
+Password reset for users 

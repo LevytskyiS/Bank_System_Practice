@@ -9,9 +9,11 @@ sys.path.append(os.path.abspath("."))
 from fastapi import Depends
 
 from sqlalchemy.orm import Session
-from src.database.models import Account, CreditCard
+from src.database.models import Account, CreditCard, Client
 from src.schemas.clients import ClientModel, UpdateVIPClientModel
+from src.schemas.creditcards import DeactivateCard
 from src.database.connect import get_db
+
 
 # For testing
 from src.database.connect import session
@@ -41,3 +43,25 @@ async def create_credit_card_repo(account_id: int, db: Session):
     db.commit()
     db.refresh(new_credit_card)
     return new_credit_card
+
+
+async def check_user_card_repo(body: DeactivateCard, db: Session):
+    user_cards = (
+        db.query(Client.tax_number, CreditCard.card_number)
+        .select_from(Client)
+        .join(Account)
+        .join(CreditCard)
+        .filter(Client.tax_number == int(body.client_tax_number))
+        .all()
+    )
+    if user_cards and int(body.card_number) in [c[1] for c in user_cards]:
+        return True
+    else:
+        return False
+
+
+async def deactivate_card_repo(body: DeactivateCard, db: Session):
+    card = db.query(CreditCard).filter_by(card_number=int(body.card_number)).first()
+    card.activated = False
+    db.commit()
+    return card

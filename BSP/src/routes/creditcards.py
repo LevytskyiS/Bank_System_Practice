@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from src.database.models import Client
-from src.schemas.creditcards import AccountNumber
+from src.schemas.creditcards import AccountNumber, DeactivateCard
 from src.database.connect import get_db
 from src.repository import creditcards as repository_ccards
 from src.schemas.creditcards import CreditCardResponseModel
@@ -34,3 +34,21 @@ async def create_credit_card(body: AccountNumber, db: Session = Depends(get_db))
         )
     credit_card = await repository_ccards.create_credit_card_repo(account.id, db)
     return credit_card
+
+
+@router.post(
+    "/deactivate_card/",
+    response_model=CreditCardResponseModel,
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def deactivate_card(body: DeactivateCard, db: Session = Depends(get_db)):
+    check_user_cards = await repository_ccards.check_user_card_repo(body, db)
+    if not check_user_cards:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Client doesn't have this card or the card doesn't belong to this client",
+        )
+    card = await repository_ccards.deactivate_card_repo(body, db)
+    return card
