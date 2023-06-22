@@ -1,11 +1,11 @@
 Client
 
-1. Delete client
+1. Delete client - Done
 2. Add "city" column to Client model
 
 Account
 
-1. Delete account
+1. Delete account - Done
 
 Credit Card
 

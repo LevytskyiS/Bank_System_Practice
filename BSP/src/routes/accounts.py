@@ -128,3 +128,24 @@ async def get_top_five_accounts(db: Session = Depends(get_db)):
     accounts = await repository_accounts.get_top_five_accounts_repo(db)
     result = await repository_accounts.convert_top_five_to_dict(accounts)
     return result
+
+
+@router.delete(
+    "/delete_account/",
+    name="Delete account"
+    # dependencies=[
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def delete_account(
+    body: DeactivateAccountdModel,
+    db: Session = Depends(get_db),
+):
+    account = await repository_accounts.check_account_exists(body.account_number, db)
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found."
+        )
+    deactivated_account = await repository_accounts.delete_account_repo(account, db)
+    return deactivated_account

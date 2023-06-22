@@ -89,3 +89,9 @@ async def convert_top_five_to_dict(accounts: list) -> list:
         }
         result.append(account)
     return result
+
+
+async def delete_account_repo(account: Account, db: Session):
+    db.delete(account)
+    db.commit()
+    return {"detail": "Account was removed from DB successfully."}

@@ -17,3 +17,7 @@ class CreditCardResponseModel(BaseModel):
 class DeactivateCard(BaseModel):
     client_tax_number: int = Field(gt=0)
     card_number: int = Field(gt=0)
+
+
+class CreditCardSearchModel:
+    card_number: int = Field(gt=0)

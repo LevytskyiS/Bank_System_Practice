@@ -88,9 +88,9 @@ async def update_vip_status_repo(body: UpdateVIPClientModel, status: str, db: Se
 
     return client
 
-    # db.query(Client)
-    # .filter_by(vip=False, active=True)
-    # .order_by(Client.first_name.desc())
-    # .limit(limit)
-    # .offset(offset)
-    # .all()
+
+async def delete_client_repo(body: UpdateVIPClientModel, db: Session):
+    client = db.query(Client).filter_by(tax_number=int(body.tax_number)).first()
+    db.delete(client)
+    db.commit()
+    return {"detail": "Client was removed from DB successfully."}

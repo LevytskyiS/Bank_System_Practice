@@ -65,3 +65,10 @@ async def deactivate_card_repo(body: DeactivateCard, db: Session):
     card.activated = False
     db.commit()
     return card
+
+
+async def delete_card_repo(body: DeactivateCard, db: Session):
+    card = db.query(CreditCard).filter_by(card_number=int(body.card_number)).first()
+    db.delete(card)
+    db.commit()
+    return {"detaile": "The credit card has been removed from DB successfully."}

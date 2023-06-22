@@ -169,3 +169,26 @@ async def update_vip_status(
         )
     client = await repository_clients.update_vip_status_repo(body, new_status, db)
     return client
+
+
+@router.delete(
+    "/delete_client/",
+    name="Delete client"
+    # dependencies=[
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def delete_client(
+    body: UpdateVIPClientModel,
+    db: Session = Depends(get_db),
+):
+    client = await repository_clients.check_existing_client_by_tax_number(
+        body.tax_number, db
+    )
+    if client is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Client not found."
+        )
+    remove_client = await repository_clients.delete_client_repo(body, db)
+    return remove_client
