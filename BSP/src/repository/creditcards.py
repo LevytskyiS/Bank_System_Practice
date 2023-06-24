@@ -72,3 +72,21 @@ async def delete_card_repo(body: DeactivateCard, db: Session):
     db.delete(card)
     db.commit()
     return {"detaile": "The credit card has been removed from DB successfully."}
+
+
+async def get_active_cards_repo(offset: int, limit: int, db: Session):
+    cards = (
+        db.query(CreditCard).filter_by(activated=True).limit(limit).offset(offset).all()
+    )
+    return cards
+
+
+async def get_deactivated_cards_repo(offset: int, limit: int, db: Session):
+    cards = (
+        db.query(CreditCard)
+        .filter_by(activated=False)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+    return cards

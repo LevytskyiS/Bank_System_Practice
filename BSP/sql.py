@@ -1,4 +1,4 @@
-"TRUNCATE TABLE clients, accounts, creditcards RESTART IDENTITY; - To reset ids"
+"TRUNCATE TABLE clients, accounts, creditcards, managers RESTART IDENTITY; - To reset ids"
 
 """
 select clientm2mbank.client_id, clientm2mbank.bank_id, banks.title, accounts.current_deposit, creditcards.card_number 

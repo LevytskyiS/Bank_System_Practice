@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, func, Table, BigInteger
+import enum
+
+from sqlalchemy import Column, Integer, String, Boolean, func, Table, BigInteger, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
@@ -31,6 +33,7 @@ class Client(Base):
     last_name = Column(String(30), nullable=False)
     tax_number = Column(BigInteger, nullable=False, unique=True)
     email = Column(String(50), nullable=False, unique=True)
+    city = Column(String(50), nullable=False)
     phone = Column(String, unique=True)
     secret_word = Column(String, nullable=False)
     passport_number = Column(String, nullable=False, unique=True)
@@ -58,3 +61,25 @@ class CreditCard(Base):
     account_id = Column("account_id", ForeignKey("accounts.id", ondelete="CASCADE"))
     account = relationship("Account", backref="accounts", innerjoin=True)
     activated = Column(Boolean, default=False)
+
+
+class Roles(enum.Enum):
+    admin: str = "admin"
+    director: str = "director"
+    team_leader: str = "team_leader"
+    manager: str = "manager"
+
+
+class Manager(Base):
+    __tablename__ = "managers"
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String(20), nullable=False)
+    last_name = Column(String(30), nullable=False)
+    email = Column(String(50), nullable=False, unique=True)
+    phone = Column(String, unique=True)
+    roles = Column("role", Enum(Roles), default=Roles.manager)
+    active = Column(Boolean, default=True)
+    password = Column(String(255), nullable=False)
+    refresh_token = Column(String(255), nullable=True)
+    reset_password_token = Column(String(255), nullable=True)
+    confirmed = Column(Boolean, default=False)

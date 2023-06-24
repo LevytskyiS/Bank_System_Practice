@@ -70,3 +70,41 @@ async def delete_card(body: DeactivateCard, db: Session = Depends(get_db)):
         )
     card = await repository_ccards.delete_card_repo(body, db)
     return card
+
+
+@router.get(
+    "/active_cards/",
+    response_model=List[CreditCardResponseModel],
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def get_active_cards(
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = Query(default=100, lte=100),
+):
+    cards = await repository_ccards.get_active_cards_repo(offset, limit, db)
+    if cards:
+        return cards
+    else:
+        return {"detail": "There are no active cards in the DB."}
+
+
+@router.get(
+    "/deactivated_cards/",
+    response_model=List[CreditCardResponseModel],
+    # Depends(allowed_create_users),
+    # Depends(RateLimiter(times=2, seconds=5)),
+    # ],
+)
+async def get_deactivated_cards(
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = Query(default=100, lte=100),
+):
+    cards = await repository_ccards.get_deactivated_cards_repo(offset, limit, db)
+    if cards:
+        return cards
+    else:
+        return {"detail": "There are no active cards in the DB."}

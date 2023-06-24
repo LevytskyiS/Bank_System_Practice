@@ -6,10 +6,12 @@ sys.path.append(os.path.abspath("."))
 
 from faker import Faker
 
-from src.database.models import Client, Account, CreditCard
+from src.database.models import Client, Account, CreditCard, Manager
 from src.database.connect import session
 
 SEX = ["male", "female"]
+ROLES = ["admin", "director", "team_leader", "manager"]
+fast_fake = Faker()
 
 
 def prep_fake_data():
@@ -173,6 +175,7 @@ def fill_db(
                 last_name=client[1],
                 tax_number=client[2],
                 email=client[3],
+                city=fast_fake.city(),
                 phone=client[4],
                 secret_word=client[5],
                 passport_number=client[6],
@@ -222,3 +225,22 @@ fill_db(
     for_accounts,
     for_credit_cards,
 )
+
+
+def create_manager_db():
+    managers = []
+    for i in range(10):
+        man = Manager(
+            first_name=fast_fake.name().split(" ")[0],
+            last_name=fast_fake.name().split(" ")[1],
+            email=f"test{i}@kuku.com",
+            phone=f"+380123123{i}",
+            roles=random.choice(ROLES),
+            password=random.choice(ROLES),
+        )
+        managers.append(man)
+    session.add_all(managers)
+    session.commit()
+
+
+create_manager_db()

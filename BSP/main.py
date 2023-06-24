@@ -1,12 +1,34 @@
+import time
+
 from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi_limiter import FastAPILimiter
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from src.routes import clients, accounts, creditcards
+from src.routes import clients, accounts, creditcards, managers, auth
 from src.database.connect import get_db
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["Process-Time"] = str(process_time)
+    return response
 
 
 # @app.on_event("startup")
@@ -47,3 +69,5 @@ def info():
 app.include_router(clients.router, prefix="/api")
 app.include_router(accounts.router, prefix="/api")
 app.include_router(creditcards.router, prefix="/api")
+app.include_router(managers.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")

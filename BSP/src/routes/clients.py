@@ -153,13 +153,6 @@ async def update_vip_status(
     new_status=Query(enum=["true", "false"]),
     db: Session = Depends(get_db),
 ):
-    try:
-        body.tax_number = int(body.tax_number)
-    except AttributeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Please enter number, not letters.",
-        )
     client = await repository_clients.check_existing_client_by_tax_number(
         body.tax_number, db
     )
