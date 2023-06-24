@@ -1,13 +1,10 @@
-from typing import List
-from fastapi import APIRouter, status, Depends, Form, Query, HTTPException
+from fastapi import APIRouter, status, Depends, Query, HTTPException
 from fastapi_limiter.depends import RateLimiter
-from pydantic import EmailStr
-
 from sqlalchemy.orm import Session
 
-from src.database.models import Manager, Roles
-from src.schemas.managers import ManagerModel, ResponseManagerModel, ChangeRoleModel
+from src.database.models import Roles
 from src.database.connect import get_db
+from src.schemas.managers import ManagerModel, ResponseManagerModel, ChangeRoleModel
 from src.repository import managers as repository_managers
 from src.services.roles import RolesChecker
 

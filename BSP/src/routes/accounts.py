@@ -1,11 +1,11 @@
 from typing import List
-from fastapi import APIRouter, status, Depends, Form, Query, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter
 from pydantic import EmailStr
 
 from sqlalchemy.orm import Session
 
-from src.database.models import Client
+from src.database.models import Roles
 from src.schemas.accounts import (
     AccountResponseModel,
     AccountModel,
@@ -17,8 +17,14 @@ from src.schemas.accounts import (
 from src.database.connect import get_db
 from src.repository import accounts as repository_accounts
 from src.repository import clients as repository_clients
+from src.services.roles import RolesChecker
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
+
+allowed_create_accounts = RolesChecker([Roles.admin, Roles.team_leader])
+allowed_update_accounts = RolesChecker([Roles.admin, Roles.team_leader, Roles.manager])
+allowed_delete_accounts = RolesChecker([Roles.admin, Roles.team_leader])
+allowed_get_info = RolesChecker([Roles.admin, Roles.team_leader, Roles.director])
 
 
 @router.post(
@@ -26,10 +32,10 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
     response_model=AccountResponseModel,
     name="Create account",
     status_code=status.HTTP_201_CREATED,
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_create_accounts),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def create_account(
     body: AccountModel,
@@ -49,11 +55,11 @@ async def create_account(
 @router.patch(
     "/deposit_cash/",
     response_model=CurrentDepositResponseModel,
-    name="Deposit cash"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Deposit cash",
+    dependencies=[
+        Depends(allowed_update_accounts),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def deposit_cash(
     body: ToDepositCash,
@@ -73,11 +79,11 @@ async def deposit_cash(
 @router.patch(
     "/withdraw_cash/",
     response_model=CurrentDepositResponseModel,
-    name="Withdraw cash"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Withdraw cash",
+    dependencies=[
+        Depends(allowed_update_accounts),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def withdraw_cash(
     body: ToDepositCash,
@@ -97,11 +103,11 @@ async def withdraw_cash(
 @router.patch(
     "/deactivate_account/",
     response_model=AccountResponseModel,
-    name="Deactivate account"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Deactivate account",
+    dependencies=[
+        Depends(allowed_delete_accounts),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def deactivate_account(
     body: DeactivateAccountdModel, db: Session = Depends(get_db)
@@ -118,11 +124,11 @@ async def deactivate_account(
 @router.get(
     "/top_five_accounts/",
     response_model=List[TopAccountsModel],
-    name="Top 5 accounts"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Top 5 accounts",
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_top_five_accounts(db: Session = Depends(get_db)):
     accounts = await repository_accounts.get_top_five_accounts_repo(db)
@@ -132,11 +138,11 @@ async def get_top_five_accounts(db: Session = Depends(get_db)):
 
 @router.delete(
     "/delete_account/",
-    name="Delete account"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Delete account",
+    dependencies=[
+        Depends(allowed_delete_accounts),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def delete_account(
     body: DeactivateAccountdModel,

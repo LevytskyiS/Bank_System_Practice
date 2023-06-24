@@ -5,24 +5,30 @@ from pydantic import EmailStr
 
 from sqlalchemy.orm import Session
 
-from src.database.models import Client
+from src.database.models import Client, Roles
 from src.schemas.creditcards import AccountNumber, DeactivateCard, CreditCardSearchModel
 from src.database.connect import get_db
 from src.repository import creditcards as repository_ccards
 from src.schemas.creditcards import CreditCardResponseModel
+from src.services.roles import RolesChecker
 
 
 router = APIRouter(prefix="/credit_cards", tags=["credit_cards"])
+
+allowed_create_cards = RolesChecker([Roles.admin, Roles.team_leader])
+allowed_update_cards = RolesChecker([Roles.admin, Roles.team_leader, Roles.manager])
+allowed_delete_cards = RolesChecker([Roles.admin, Roles.team_leader, Roles.manager])
+allowed_get_info = RolesChecker([Roles.admin, Roles.director, Roles.team_leader])
 
 
 @router.post(
     "/new_credit_card/",
     response_model=CreditCardResponseModel,
     status_code=status.HTTP_201_CREATED,
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_create_cards),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def create_credit_card(body: AccountNumber, db: Session = Depends(get_db)):
     account = await repository_ccards.check_existing_account_repo(
@@ -39,9 +45,10 @@ async def create_credit_card(body: AccountNumber, db: Session = Depends(get_db))
 @router.post(
     "/deactivate_card/",
     response_model=CreditCardResponseModel,
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_update_cards),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def deactivate_card(body: DeactivateCard, db: Session = Depends(get_db)):
     check_user_cards = await repository_ccards.check_user_card_repo(body, db)
@@ -57,9 +64,10 @@ async def deactivate_card(body: DeactivateCard, db: Session = Depends(get_db)):
 @router.delete(
     "/delete_card/",
     # response_model=CreditCardResponseModel,
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_delete_cards),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def delete_card(body: DeactivateCard, db: Session = Depends(get_db)):
     check_user_cards = await repository_ccards.check_user_card_repo(body, db)
@@ -75,9 +83,10 @@ async def delete_card(body: DeactivateCard, db: Session = Depends(get_db)):
 @router.get(
     "/active_cards/",
     response_model=List[CreditCardResponseModel],
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_active_cards(
     db: Session = Depends(get_db),
@@ -94,9 +103,10 @@ async def get_active_cards(
 @router.get(
     "/deactivated_cards/",
     response_model=List[CreditCardResponseModel],
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_deactivated_cards(
     db: Session = Depends(get_db),

@@ -1,21 +1,28 @@
 from typing import List
-from fastapi import APIRouter, status, Depends, Form, Query, HTTPException
-from fastapi_limiter.depends import RateLimiter
-from pydantic import EmailStr
 
+from fastapi import APIRouter, status, Depends, Query, HTTPException
+from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.orm import Session
 
-from src.database.models import Client
+from src.database.models import Roles
+from src.database.connect import get_db
 from src.schemas.clients import (
     ClientModel,
     ResponseClientModel,
     UpdateVIPClientModel,
     VIPStatusResponse,
 )
-from src.database.connect import get_db
+
 from src.repository import clients as repository_clients
+from src.services.roles import RolesChecker
+from src.services.auth import auth_service
 
 router = APIRouter(prefix="/clients", tags=["clients"])
+
+allowed_create_clients = RolesChecker([Roles.admin, Roles.team_leader])
+allowed_update_clients = RolesChecker([Roles.admin, Roles.team_leader, Roles.manager])
+allowed_delete_clients = RolesChecker([Roles.admin, Roles.team_leader])
+allowed_get_info = RolesChecker([Roles.admin, Roles.team_leader, Roles.director])
 
 
 @router.post(
@@ -24,8 +31,8 @@ router = APIRouter(prefix="/clients", tags=["clients"])
     name="Create client",
     status_code=status.HTTP_201_CREATED,
     dependencies=[
-        # Depends(allowed_create_users),
-        # Depends(RateLimiter(times=2, seconds=5)),
+        Depends(allowed_create_clients),
+        Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def create_client(
@@ -41,9 +48,8 @@ async def create_client(
             status_code=status.HTTP_409_CONFLICT,
             detail="Client with such TN is already registered",
         )
+    body.password = auth_service.get_password_hash(body.password)
     client = await repository_clients.create_client(body, sex, db)
-    # body.password = auth_service.get_password_hash(body.password)
-    # user = await repository_users.create_user(body, db)
     return client
 
 
@@ -51,10 +57,10 @@ async def create_client(
     "/client/",
     response_model=ResponseClientModel,
     name="Get client",
-    # dependencies=[
-    #     Depends(allowed_create_users),
-    #     Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_one_client(tax_number: int, db: Session = Depends(get_db)):
     client = await repository_clients.check_existing_client_by_tax_number(
@@ -71,10 +77,10 @@ async def get_one_client(tax_number: int, db: Session = Depends(get_db)):
     "/active_clients/",
     response_model=List[ResponseClientModel],
     name="Get all active clients",
-    # dependencies=[
-    #     Depends(allowed_create_users),
-    #     Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_all_active_clients(
     db: Session = Depends(get_db),
@@ -89,10 +95,10 @@ async def get_all_active_clients(
     "/unactive_clients/",
     response_model=List[ResponseClientModel],
     name="Get all unactive clients",
-    # dependencies=[
-    #     Depends(allowed_create_users),
-    #     Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_all_unactive_clients(
     db: Session = Depends(get_db),
@@ -107,10 +113,10 @@ async def get_all_unactive_clients(
     "/vip_clients/",
     response_model=List[ResponseClientModel],
     name="Get all active VIP clients",
-    # dependencies=[
-    #     Depends(allowed_create_users),
-    #     Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_all_vip_clients(
     db: Session = Depends(get_db),
@@ -125,10 +131,10 @@ async def get_all_vip_clients(
     "/non_vip_clients/",
     response_model=List[ResponseClientModel],
     name="Get all active NON VIP clients",
-    # dependencies=[
-    #     Depends(allowed_create_users),
-    #     Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    dependencies=[
+        Depends(allowed_get_info),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def get_all_non_vip_clients(
     db: Session = Depends(get_db),
@@ -142,11 +148,11 @@ async def get_all_non_vip_clients(
 @router.patch(
     "/update_vip_status/",
     response_model=VIPStatusResponse,
-    name="Update VIP status"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Update VIP status",
+    dependencies=[
+        Depends(allowed_update_clients),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def update_vip_status(
     body: UpdateVIPClientModel,
@@ -166,11 +172,11 @@ async def update_vip_status(
 
 @router.delete(
     "/delete_client/",
-    name="Delete client"
-    # dependencies=[
-    # Depends(allowed_create_users),
-    # Depends(RateLimiter(times=2, seconds=5)),
-    # ],
+    name="Delete client",
+    dependencies=[
+        Depends(allowed_delete_clients),
+        Depends(RateLimiter(times=2, seconds=5)),
+    ],
 )
 async def delete_client(
     body: UpdateVIPClientModel,
