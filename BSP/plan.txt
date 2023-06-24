@@ -8,10 +8,6 @@ Managers
 
 Dependencies
 
-1. Add roles to every route 
-
-Login using BearerToken
-
 Email confirmation
 
 1. Create beautiful e-mail

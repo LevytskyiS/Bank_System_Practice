@@ -1,11 +1,11 @@
 from typing import List
+
 from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter
-from pydantic import EmailStr
-
 from sqlalchemy.orm import Session
 
 from src.database.models import Roles
+from src.database.connect import get_db
 from src.schemas.accounts import (
     AccountResponseModel,
     AccountModel,
@@ -14,7 +14,6 @@ from src.schemas.accounts import (
     DeactivateAccountdModel,
     TopAccountsModel,
 )
-from src.database.connect import get_db
 from src.repository import accounts as repository_accounts
 from src.repository import clients as repository_clients
 from src.services.roles import RolesChecker

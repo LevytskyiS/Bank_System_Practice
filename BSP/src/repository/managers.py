@@ -47,3 +47,9 @@ async def remove_manager_repo(body: ChangeRoleModel, db: Session):
 async def update_token_repo(manager: ManagerModel, refesh_token: str, db: Session):
     manager.refresh_token = refesh_token
     db.commit()
+
+
+async def confirmed_email_repo(email: str, db: Session):
+    manager = await check_existing_manager_by_email(email, db)
+    manager.confirmed = True
+    db.commit()

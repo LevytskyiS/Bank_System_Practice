@@ -29,7 +29,7 @@ from src.schemas.auth import (
 from src.repository import managers as repository_managers
 from src.services.auth import auth_service
 
-# from src.services.email import send_email, send_email_reset_password_token
+from src.services.email import send_email, send_email_reset_password_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
@@ -53,10 +53,9 @@ async def signup(
         )
     body.password = auth_service.get_password_hash(body.password)
     manager = await repository_managers.create_manager_repo(body, db)
-    # background_tasks.add_task(
-    #     send_email, contact.email, contact.first_name, request.base_url
-    # )
-    print(manager)
+    background_tasks.add_task(
+        send_email, manager.email, manager.first_name, request.base_url
+    )
     return manager
 
 
@@ -116,18 +115,18 @@ async def login(
 #     }
 
 
-# @router.get("/confirmed_email/{token}")
-# async def confirmed_email(token: str, db: Session = Depends(get_db)):
-#     email = await auth_service.get_email_from_token(token)
-#     contact = await repository_contacts.search_by_mail(email, db)
-#     if contact is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
-#         )
-#     if contact.confirmed:
-#         return {"message": "Your e-mail is already confirmed."}
-#     await repository_contacts.confirmed_email(email, db)
-#     return {"message": "Email confirmed"}
+@router.get("/confirmed_email/{token}")
+async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    email = await auth_service.get_email_from_token(token)
+    manager = await repository_managers.check_existing_manager_by_email(email, db)
+    if manager is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
+        )
+    if manager.confirmed:
+        return {"message": "Your e-mail is already confirmed."}
+    await repository_managers.confirmed_email_repo(email, db)
+    return {"message": "Email confirmed"}
 
 
 # @router.post("/request_email")
