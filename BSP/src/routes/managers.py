@@ -7,6 +7,7 @@ from src.database.connect import get_db
 from src.schemas.managers import ManagerModel, ResponseManagerModel, ChangeRoleModel
 from src.repository import managers as repository_managers
 from src.services.roles import RolesChecker
+from src.services.auth import auth_service
 
 router = APIRouter(prefix="/managers", tags=["managers"])
 
@@ -21,7 +22,7 @@ allowed_update_managers = RolesChecker([Roles.admin, Roles.team_leader, Roles.ma
     status_code=status.HTTP_201_CREATED,
     dependencies=[
         Depends(allowed_create_managers),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def create_manager(body: ManagerModel, db: Session = Depends(get_db)):
@@ -33,6 +34,7 @@ async def create_manager(body: ManagerModel, db: Session = Depends(get_db)):
             status_code=status.HTTP_409_CONFLICT,
             detail="Manager with such e-mail is already registered.",
         )
+    body.password = auth_service.get_password_hash(body.password)
     manager = await repository_managers.create_manager_repo(body, db)
     return manager
 
@@ -43,7 +45,7 @@ async def create_manager(body: ManagerModel, db: Session = Depends(get_db)):
     name="Change manager's role",
     dependencies=[
         Depends(allowed_update_managers),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def change_role(
@@ -68,7 +70,7 @@ async def change_role(
     name="Delete manager",
     dependencies=[
         Depends(allowed_create_managers),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def delete_manager(

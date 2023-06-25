@@ -27,7 +27,7 @@ allowed_get_info = RolesChecker([Roles.admin, Roles.director, Roles.team_leader]
     status_code=status.HTTP_201_CREATED,
     dependencies=[
         Depends(allowed_create_cards),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def create_credit_card(body: AccountNumber, db: Session = Depends(get_db)):
@@ -47,7 +47,7 @@ async def create_credit_card(body: AccountNumber, db: Session = Depends(get_db))
     response_model=CreditCardResponseModel,
     dependencies=[
         Depends(allowed_update_cards),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def deactivate_card(body: DeactivateCard, db: Session = Depends(get_db)):
@@ -66,7 +66,7 @@ async def deactivate_card(body: DeactivateCard, db: Session = Depends(get_db)):
     # response_model=CreditCardResponseModel,
     dependencies=[
         Depends(allowed_delete_cards),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def delete_card(body: DeactivateCard, db: Session = Depends(get_db)):
@@ -85,7 +85,7 @@ async def delete_card(body: DeactivateCard, db: Session = Depends(get_db)):
     response_model=List[CreditCardResponseModel],
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_active_cards(
@@ -105,7 +105,7 @@ async def get_active_cards(
     response_model=List[CreditCardResponseModel],
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_deactivated_cards(

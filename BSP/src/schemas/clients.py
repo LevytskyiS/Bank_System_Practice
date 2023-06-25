@@ -6,6 +6,7 @@ class ClientModel(BaseModel):
     last_name: str = Field(min_length=1, max_length=30)
     tax_number: int = Field(gt=1000000, le=9999999)
     email: EmailStr
+    city: str = Field(min_length=3, max_length=20)
     phone: int = Field(gt=100000000, le=999999999)
     secret_word: str = Field(min_length=5)
     passport_number: str = Field()

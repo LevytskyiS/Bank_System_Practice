@@ -15,7 +15,7 @@ from src.schemas.clients import (
 
 from src.repository import clients as repository_clients
 from src.services.roles import RolesChecker
-from src.services.auth import auth_service
+
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
@@ -32,7 +32,7 @@ allowed_get_info = RolesChecker([Roles.admin, Roles.team_leader, Roles.director]
     status_code=status.HTTP_201_CREATED,
     dependencies=[
         Depends(allowed_create_clients),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def create_client(
@@ -48,7 +48,6 @@ async def create_client(
             status_code=status.HTTP_409_CONFLICT,
             detail="Client with such TN is already registered",
         )
-    body.password = auth_service.get_password_hash(body.password)
     client = await repository_clients.create_client(body, sex, db)
     return client
 
@@ -59,7 +58,7 @@ async def create_client(
     name="Get client",
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_one_client(tax_number: int, db: Session = Depends(get_db)):
@@ -79,7 +78,7 @@ async def get_one_client(tax_number: int, db: Session = Depends(get_db)):
     name="Get all active clients",
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_all_active_clients(
@@ -97,7 +96,7 @@ async def get_all_active_clients(
     name="Get all unactive clients",
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_all_unactive_clients(
@@ -115,7 +114,7 @@ async def get_all_unactive_clients(
     name="Get all active VIP clients",
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_all_vip_clients(
@@ -133,7 +132,7 @@ async def get_all_vip_clients(
     name="Get all active NON VIP clients",
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_all_non_vip_clients(
@@ -151,7 +150,7 @@ async def get_all_non_vip_clients(
     name="Update VIP status",
     dependencies=[
         Depends(allowed_update_clients),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def update_vip_status(
@@ -175,7 +174,7 @@ async def update_vip_status(
     name="Delete client",
     dependencies=[
         Depends(allowed_delete_clients),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def delete_client(

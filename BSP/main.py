@@ -1,5 +1,7 @@
 import time
 
+import redis.asyncio as redis
+
 from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi_limiter import FastAPILimiter
 from fastapi.middleware.cors import CORSMiddleware

@@ -33,7 +33,7 @@ allowed_get_info = RolesChecker([Roles.admin, Roles.team_leader, Roles.director]
     status_code=status.HTTP_201_CREATED,
     dependencies=[
         Depends(allowed_create_accounts),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def create_account(
@@ -57,7 +57,7 @@ async def create_account(
     name="Deposit cash",
     dependencies=[
         Depends(allowed_update_accounts),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def deposit_cash(
@@ -81,7 +81,7 @@ async def deposit_cash(
     name="Withdraw cash",
     dependencies=[
         Depends(allowed_update_accounts),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def withdraw_cash(
@@ -105,7 +105,7 @@ async def withdraw_cash(
     name="Deactivate account",
     dependencies=[
         Depends(allowed_delete_accounts),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def deactivate_account(
@@ -126,7 +126,7 @@ async def deactivate_account(
     name="Top 5 accounts",
     dependencies=[
         Depends(allowed_get_info),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def get_top_five_accounts(db: Session = Depends(get_db)):
@@ -140,7 +140,7 @@ async def get_top_five_accounts(db: Session = Depends(get_db)):
     name="Delete account",
     dependencies=[
         Depends(allowed_delete_accounts),
-        Depends(RateLimiter(times=2, seconds=5)),
+        # Depends(RateLimiter(times=2, seconds=5)),
     ],
 )
 async def delete_account(

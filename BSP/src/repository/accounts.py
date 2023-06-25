@@ -20,10 +20,23 @@ from src.database.connect import session
 
 
 async def create_unique_acc_number():
+    """Creates unique account number
+
+    :return: str
+    """
     return f"GB{random.randrange(1000000, 99999999999999)}"
 
 
-async def create_account_repo(client: Client, db: Session):
+async def create_account_repo(client: Client, db: Session) -> Client:
+    """Creates new client and saves him to database
+
+    :param client: Info about client
+    :type client: Client
+    :param db: Connectio to database
+    :type db: Session
+    :return: New client
+    :rtype: Client
+    """
     accounts = [acc.account_number for acc in db.query(Account).all()]
     new_account_number = await create_unique_acc_number()
     while True:

@@ -98,16 +98,16 @@ async def login(
 # ):
 #     token = credentials.credentials
 #     email = await auth_service.decode_refresh_token(token)
-#     contact = await repository_contacts.search_by_mail(email, db)
-#     if contact.refresh_token != token:
-#         await repository_contacts.update_token(contact, None, db)
+#     manager = await repository_managers.check_existing_manager_by_email(email, db)
+#     if manager.refresh_token != token:
+#         await repository_managers.update_token_repo(manager, None, db)
 #         raise HTTPException(
 #             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
 #         )
 
 #     access_token = await auth_service.create_access_token(data={"sub": email})
 #     refresh_token = await auth_service.create_refresh_token(data={"sub": email})
-#     await repository_contacts.update_token(contact, refresh_token, db)
+#     await repository_managers.update_token_repo(manager, refresh_token, db)
 #     return {
 #         "access_token": access_token,
 #         "refresh_token": refresh_token,
@@ -115,7 +115,7 @@ async def login(
 #     }
 
 
-@router.get("/confirmed_email/{token}")
+@router.get("/confirmed_email")
 async def confirmed_email(token: str, db: Session = Depends(get_db)):
     email = await auth_service.get_email_from_token(token)
     manager = await repository_managers.check_existing_manager_by_email(email, db)
@@ -129,87 +129,87 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)):
     return {"message": "Email confirmed"}
 
 
-# @router.post("/request_email")
-# async def request_email(
-#     body: RequestEmail,
-#     background_tasks: BackgroundTasks,
-#     request: Request,
-#     db: Session = Depends(get_db),
-# ):
-#     contact = await repository_contacts.search_by_mail(body.email, db)
+@router.post("/request_email")
+async def request_email(
+    body: RequestEmail,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    manager = await repository_managers.check_existing_manager_by_email(body.email, db)
 
-#     if contact.confirmed:
-#         return {"message": "Your email is already confirmed."}
-#     if contact:
-#         background_tasks.add_task(
-#             send_email, contact.email, contact.first_name, request.base_url
-#         )
-#     return {"message": "Check your email for confirmation."}
-
-
-# @router.get(
-#     "/forgot_password",
-#     name="Forgot password",
-#     dependencies=[Depends(RateLimiter(times=2, seconds=5))],
-# )
-# async def forgot_password(
-#     email: str,
-#     background_tasks: BackgroundTasks,
-#     db: Session = Depends(get_db),
-# ):
-#     contact = await repository_contacts.search_by_mail(email, db)
-#     if bool(contact) == False:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="Not found or doesn't exist."
-#         )
-#     reset_password_token = uuid.uuid1()
-#     background_tasks.add_task(
-#         send_email_reset_password_token,
-#         reset_password_token,
-#         contact.email,
-#         contact.first_name,
-#     )
-
-#     contact.reset_password_token = reset_password_token
-#     db.commit()
-
-#     return {
-#         "message": f"Reset password token has been sent to your e-email.{reset_password_token}"
-#     }
+    if manager.confirmed:
+        return {"message": "Your email is already confirmed."}
+    if manager:
+        background_tasks.add_task(
+            send_email, manager.email, manager.first_name, request.base_url
+        )
+    return {"message": "Check your email for confirmation."}
 
 
-# @router.patch(
-#     "/reset_password",
-#     name="Reset password",
-#     response_model=ContactDb,
-#     dependencies=[
-#         Depends(RateLimiter(times=2, seconds=5)),
-#     ],
-# )
-# async def reset_password(
-#     body: ResetPasswordModel,
-#     db: Session = Depends(get_db),
-# ):
-#     contact = await repository_contacts.search_by_mail(body.email, db)
-#     if bool(contact) == False:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="Not found or doesn't exist."
-#         )
+@router.get(
+    "/forgot_password",
+    name="Forgot password",
+    # dependencies=[Depends(RateLimiter(times=2, seconds=5))],
+)
+async def forgot_password(
+    email: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    manager = await repository_managers.check_existing_manager_by_email(email, db)
+    if not manager:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Not found or doesn't exist."
+        )
+    reset_password_token = uuid.uuid1()
+    background_tasks.add_task(
+        send_email_reset_password_token,
+        reset_password_token,
+        manager.email,
+        manager.first_name,
+    )
 
-#     if body.reset_password_token != contact.reset_password_token:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Password reset tokens doesn't match.",
-#         )
+    manager.reset_password_token = reset_password_token
+    db.commit()
 
-#     if body.password != body.confirm_password:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="New password is not match."
-#         )
+    return {
+        "message": f"Reset password token has been sent to your e-email.{reset_password_token}"
+    }
 
-#     body.password = auth_service.get_password_hash(body.password)
-#     contact.password = body.password
-#     contact.reset_password_token = None
-#     db.commit()
 
-#     return contact
+@router.patch(
+    "/reset_password",
+    name="Reset password",
+    response_model=ResponseManagerModel,
+    dependencies=[
+        # Depends(RateLimiter(times=2, seconds=5)),
+    ],
+)
+async def reset_password(
+    body: ResetPasswordModel,
+    db: Session = Depends(get_db),
+):
+    manager = await repository_managers.check_existing_manager_by_email(body.email, db)
+    if not manager:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Not found or doesn't exist."
+        )
+
+    if body.reset_password_token != manager.reset_password_token:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Password reset tokens doesn't match.",
+        )
+
+    if body.password != body.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="New password is not match."
+        )
+
+    body.password = auth_service.get_password_hash(body.password)
+    manager.password = body.password
+    manager.reset_password_token = None
+    db.commit()
+
+    return manager

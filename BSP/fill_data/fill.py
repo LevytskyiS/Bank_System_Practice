@@ -11,6 +11,31 @@ from src.database.connect import session
 
 SEX = ["male", "female"]
 ROLES = ["admin", "director", "team_leader", "manager"]
+CITIES = [
+    "London",
+    "Kyiv",
+    "Prague",
+    "Paris",
+    "Berlin",
+    "Liverpool",
+    "Lisbon",
+    # "Dortmund",
+    # "Munich",
+    # "Zadar",
+    # "Lviv",
+    # "Madrid",
+    # "Barcelona",
+    # "LA",
+    # "Detroit",
+    # "Ohio",
+    # "Toronto",
+    # "Valencia",
+    # "Milan",
+    # "Rome",
+    # "Amsterdam",
+    # "Vienna",
+    # "Warsaw",
+]
 fast_fake = Faker()
 
 
@@ -175,7 +200,8 @@ def fill_db(
                 last_name=client[1],
                 tax_number=client[2],
                 email=client[3],
-                city=fast_fake.city(),
+                # city=fast_fake.city(),
+                city=random.choice(CITIES),
                 phone=client[4],
                 secret_word=client[5],
                 passport_number=client[6],
