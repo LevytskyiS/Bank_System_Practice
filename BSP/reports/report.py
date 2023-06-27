@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.abspath("."))
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -55,21 +56,26 @@ df = pd.read_sql(sql_query, conn)
 #     export_pdf.savefig()
 #     plt.close("all")
 
-dfc = df.groupby(["city"])["city"].count()
-nums = dfc.values
-labels = dfc.index
+# dfc = df.groupby(["city"])["city"].count()
+# nums = dfc.values
+# labels = dfc.index
 
-with PdfPages(pdf_path) as export_pdf:
-    plt.figure(figsize=(12, 9))
-    plt.pie(
-        nums,
-        labels=labels,
-        shadow=True,
-        autopct="%.2f%%",
-        pctdistance=1.15,
-        labeldistance=1.35,
-    )
+# with PdfPages(pdf_path) as export_pdf:
+#     plt.figure(figsize=(12, 9))
+#     plt.pie(
+#         nums,
+#         labels=labels,
+#         shadow=True,
+#         autopct="%.2f%%",
+#         pctdistance=1.15,
+#         labeldistance=1.35,
+#     )
 
-    # plt.show()
-    export_pdf.savefig()
-    plt.close("all")
+#     # plt.show()
+#     export_pdf.savefig()
+#     plt.close("all")
+
+# print(np.sum(df.isnull()))
+# print(pd.unique(df["city"]))
+# df["current_deposit"].plot(kind="hist", title="City frequency", grid=True)
+print(df.city)
